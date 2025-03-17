@@ -1,0 +1,3 @@
+../App/hw/hw.c:10:6:hwInit	1
+../App/hw/hw.c:15:6:delay	1
+../App/hw/hw.c:19:10:millis	1
