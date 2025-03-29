@@ -2,11 +2,6 @@
 .metadata/
 Debug/
 
-# Project Setting file
-.cproject
-.mxproject
-.project
-
 # Prerequisites
 *.d
 
