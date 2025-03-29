@@ -1,5 +1,12 @@
 # Folder
 .metadata/
+.settings/
+Debug/
+
+# Project Setting file
+.cproject
+.mxproject
+.project
 
 # Prerequisites
 *.d
@@ -14,6 +21,7 @@
 *.ilk
 *.map
 *.exp
+*.ld
 
 # Precompiled Headers
 *.gch
