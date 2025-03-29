@@ -1,6 +1,5 @@
 # Folder
 .metadata/
-.settings/
 Debug/
 
 # Project Setting file
@@ -21,7 +20,6 @@ Debug/
 *.ilk
 *.map
 *.exp
-*.ld
 
 # Precompiled Headers
 *.gch
