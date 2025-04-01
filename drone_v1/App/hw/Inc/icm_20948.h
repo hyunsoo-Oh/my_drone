@@ -70,7 +70,7 @@ typedef struct {
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
 	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	gyroavg_t sample;
+	gyroavg_t sample;		// 센서 데이터 읽는 속도 조절
 	uint8_t odr;            // Output Data Rate (Hz)
 	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (GYRO_YOUT_H/L)
@@ -83,7 +83,7 @@ typedef struct {
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
 	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	accelavg_t sample;
+	accelavg_t sample;		// 센서 데이터 읽는 속도 조절
 	uint16_t odr;           // Output Data Rate (Hz)
 	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
@@ -110,6 +110,6 @@ void ICM_ACCEL_Config(AccelConfig *accel);
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);
-void ICM_CLEANING_GetData(GyroConfig *gyro, AccelConfig *accel);
+void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
 
 #endif /* HW_INC_ICM_20948_H_ */

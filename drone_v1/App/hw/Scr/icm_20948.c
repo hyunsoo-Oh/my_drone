@@ -30,13 +30,11 @@ ICM_Init(gyro, accel);
 void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data)
 {
 	uint8_t buff = data;
-	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											&buff, 1, 100);
+	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, &buff, 1, 100);
 }
 void I2C_Read(uint8_t addr, uint8_t reg, uint8_t *data, uint8_t length)
 {
-	HAL_I2C_Mem_Read(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											data, length, 100);
+	HAL_I2C_Mem_Read(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, data, length, 100);
 }
 
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
@@ -53,8 +51,7 @@ void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length)
 void ICM_SlaveWrite(uint16_t addr, uint8_t reg, uint8_t data)
 {
 	uint8_t buff = data;
-	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											&buff, 1, 100);
+	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, &buff, 1, 100);
 }
 
 void ICM_Init(GyroConfig gyro, AccelConfig accel)
@@ -78,8 +75,8 @@ void ICM_READ_WhoAmI()
 {
 	uint8_t responseAddr = 0;
 	ICM_Read(BANK_0, WHO_AM_I, &responseAddr, 1);
-	if (responseAddr == 0xEA)  printf("OK \n\r");
-	else  printf("Don't find ICM");
+	if (responseAddr == 0xEA)	printf("OK \n\r");
+	else 	printf("Don't find ICM");
 }
 void ICM_WakeUp()
 {
@@ -103,7 +100,7 @@ void ICM_GYRO_Config(GyroConfig *gyro)
 		case _500dps:  gyro->sensitivity = 65;    break;
 		case _1000dps: gyro->sensitivity = 32;    break;
 		case _2000dps: gyro->sensitivity = 16;    break;
-  }
+	}
 }
 void ICM_ACCEL_Config(AccelConfig *accel)
 {
@@ -119,7 +116,7 @@ void ICM_ACCEL_Config(AccelConfig *accel)
 		case _4g:  accel->sensitivity = 8192;  break;
 		case _8g:  accel->sensitivity = 4096;  break;
 		case _16g: accel->sensitivity = 2048;  break;
-  }
+	}
 }
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel)
 {
@@ -143,7 +140,7 @@ void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel)
 	printf("Gyro X: %d, Y: %d, Z: %d\n", gyro->x_data, gyro->y_data, gyro->z_data);
 	printf("Accel X: %d, Y: %d, Z: %d\n", accel->x_data, accel->y_data, accel->z_data);
 }
-void ICM_CLEANING_GetData(GyroConfig *gyro, AccelConfig *accel)
+void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel)
 {
 	float gyro_x_dps = (float)gyro->x_data / gyro->sensitivity;
 	float gyro_y_dps = (float)gyro->y_data / gyro->sensitivity;
