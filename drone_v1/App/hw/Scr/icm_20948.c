@@ -99,10 +99,10 @@ void ICM_GYRO_Config(GyroConfig *gyro)
 	ICM_Write(BANK_2, GYRO_CONFIG_2, sampleAvg);
 
 	switch (gyro->fs_sel) {
-    case _250dps:  gyro->sensitivity = 131;   break;
-    case _500dps:  gyro->sensitivity = 65;    break;
-    case _1000dps: gyro->sensitivity = 32;    break;
-    case _2000dps: gyro->sensitivity = 16;    break;
+		case _250dps:  gyro->sensitivity = 131;   break;
+		case _500dps:  gyro->sensitivity = 65;    break;
+		case _1000dps: gyro->sensitivity = 32;    break;
+		case _2000dps: gyro->sensitivity = 16;    break;
   }
 }
 void ICM_ACCEL_Config(AccelConfig *accel)
@@ -115,10 +115,10 @@ void ICM_ACCEL_Config(AccelConfig *accel)
 	ICM_Write(BANK_2, ACCEL_CONFIG_2, sampleAvg);
 
 	switch (accel->fs_sel) {
-    case _2g:  accel->sensitivity = 16384; break;
-    case _4g:  accel->sensitivity = 8192;  break;
-    case _8g:  accel->sensitivity = 4096;  break;
-    case _16g: accel->sensitivity = 2048;  break;
+		case _2g:  accel->sensitivity = 16384; break;
+		case _4g:  accel->sensitivity = 8192;  break;
+		case _8g:  accel->sensitivity = 4096;  break;
+		case _16g: accel->sensitivity = 2048;  break;
   }
 }
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel)
