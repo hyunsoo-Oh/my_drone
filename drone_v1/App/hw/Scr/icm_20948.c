@@ -10,18 +10,18 @@
 uint8_t imu_data[22];
 
 GyroConfig gyro = {
-    .fs_sel = _250dps,
-    .dlpf_en = 1,
-    .dlpf_cfg = 0,
-    .sample = _1xg,
-    .odr = 100
+	.fs_sel = _250dps,
+	.dlpf_en = 1,
+	.dlpf_cfg = 0,
+	.sample = _1xg,
+	.odr = 100
 };
 AccelConfig accel = {
-    .fs_sel = _2g,
-    .dlpf_en = 1,
-    .dlpf_cfg = 0,
-    .sample = _1_4xa,
-    .odr = 100
+	.fs_sel = _2g,
+	.dlpf_en = 1,
+	.dlpf_cfg = 0,
+	.sample = _1_4xa,
+	.odr = 100
 };
 
 ICM_Init(gyro, accel);
@@ -133,12 +133,12 @@ void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel)
 {
 	imu_data = ICM_Read(BANK_0, ACCEL_DATA, data, 14);
 
-  accel->x_data = (int16_t)(data[0] << 8 | data[1]);
-  accel->y_data = (int16_t)(data[2] << 8 | data[3]);
-  accel->z_data = (int16_t)(data[4] << 8 | data[5]);
-  gyro->x_data = (int16_t)(data[8] << 8 | data[9]);
-  gyro->y_data = (int16_t)(data[10] << 8 | data[11]);
-  gyro->z_data = (int16_t)(data[12] << 8 | data[13]);
+	accel->x_data = (int16_t)(data[0] << 8 | data[1]);
+	accel->y_data = (int16_t)(data[2] << 8 | data[3]);
+	accel->z_data = (int16_t)(data[4] << 8 | data[5]);
+	gyro->x_data = (int16_t)(data[8] << 8 | data[9]);
+	gyro->y_data = (int16_t)(data[10] << 8 | data[11]);
+	gyro->z_data = (int16_t)(data[12] << 8 | data[13]);
 
 	printf("Gyro X: %d, Y: %d, Z: %d\n", gyro->x_data, gyro->y_data, gyro->z_data);
 	printf("Accel X: %d, Y: %d, Z: %d\n", accel->x_data, accel->y_data, accel->z_data);
