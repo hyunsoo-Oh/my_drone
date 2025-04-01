@@ -37,36 +37,14 @@
 #define ACCEL_CONFIG   			0x14
 #define ACCEL_CONFIG_2 			0x15
 
+#define ODR_ALIGN_EN				0x09
+
 #define GYRO_SMPLRT_DIV     0x00
 #define ACCEL_SMPLRT_DIV_1  0x10
 #define ACCEL_SMPLRT_DIV_2  0x11
 
 #define SLV_READ       			0x80
 #define SLV_WRITE      			0x00
-
-// 자이로스코프 설정 구조체
-typedef struct {
-	uint8_t fs_sel;         // Full-Scale Range 선택
-	uint8_t dlpf_en;        // DLPF Enable
-	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	uint8_t odr;            // Output Data Rate (Hz)
-	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
-	int16_t y_data;         // Y축 데이터 (GYRO_YOUT_H/L)
-	int16_t z_data;         // Z축 데이터 (GYRO_ZOUT_H/L)
-} GyroConfig;
-
-// 가속도계 설정 구조체
-typedef struct {
-	uint8_t fs_sel;        // Full-Scale Range 선택
-	uint8_t dlpf_en;        // DLPF Enable
-	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	uint16_t odr;           // Output Data Rate (Hz)
-	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
-	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
-	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
-} AccelConfig;
 
 typedef enum
 {
@@ -86,21 +64,49 @@ typedef enum
 	_1_4xa, _8xa, _16xa, _32xa
 } accelavg_t;
 
+// 자이로스코프 설정 구조체
+typedef struct {
+	uint8_t fs_sel;         // Full-Scale Range 선택
+	uint8_t dlpf_en;        // DLPF Enable
+	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
+	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
+	gyroavg_t sample;
+	uint8_t odr;            // Output Data Rate (Hz)
+	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
+	int16_t y_data;         // Y축 데이터 (GYRO_YOUT_H/L)
+	int16_t z_data;         // Z축 데이터 (GYRO_ZOUT_H/L)
+} GyroConfig;
+
+// 가속도계 설정 구조체
+typedef struct {
+	uint8_t fs_sel;        // Full-Scale Range 선택
+	uint8_t dlpf_en;        // DLPF Enable
+	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
+	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
+	accelavg_t sample;
+	uint16_t odr;           // Output Data Rate (Hz)
+	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
+	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
+	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
+} AccelConfig;
+
 //int16_t mag_X = 0;
 //int16_t mag_Y = 0;
 //int16_t mag_Z = 0;
 
 void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data);
 void I2C_Read(uint8_t addr, uint8_t reg, uint8_t *data, uint8_t length);
-void ICM_SlaveWrite(uint16_t addr, uint8_t reg, uint8_t data);
 
-void ICM_Init();
+void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data);
+void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length);
+void ICM_SlaveWrite(uint16_t bank, uint8_t reg, uint8_t data);
+
+void ICM_Init(GyroConfig gyro, AccelConfig accel);
 void ICM_Reset();
 void ICM_READ_WhoAmI();
 void ICM_WakeUp();
-void ICM_ChangeBank(uint8_t bank);
-void ICM_GYRO_Config(GyroConfig *gyro, gyroavg_t avg);
-void ICM_ACCEL_Config(AccelConfig *accel, accelavg_t avg);
+void ICM_GYRO_Config(GyroConfig *gyro);
+void ICM_ACCEL_Config(AccelConfig *accel);
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);

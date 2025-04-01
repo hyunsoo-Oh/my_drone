@@ -13,7 +13,7 @@ extern AccelConfig accel;
 void apInit()
 {
 	printf("Starting ICM-20948 \n\r");
-	ICM_Init();
+//	ICM_Init();
 }
 
 void apMain()

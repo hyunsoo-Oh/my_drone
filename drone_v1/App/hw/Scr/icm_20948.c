@@ -9,72 +9,94 @@
 
 uint8_t imu_data[22];
 
-GyroConfig gyro;
-AccelConfig accel;
+GyroConfig gyro = {
+    .fs_sel = _250dps,
+    .dlpf_en = 1,
+    .dlpf_cfg = 0,
+    .sample = _1xg,
+    .odr = 100
+};
+AccelConfig accel = {
+    .fs_sel = _2g,
+    .dlpf_en = 1,
+    .dlpf_cfg = 0,
+    .sample = _1_4xa,
+    .odr = 100
+};
+
+ICM_Init(gyro, accel);
 
 
 void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data)
 {
 	uint8_t buff = data;
 	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											&buff, 1, HAL_MAX_DELAY);
+											&buff, 1, 100);
 }
 void I2C_Read(uint8_t addr, uint8_t reg, uint8_t *data, uint8_t length)
 {
 	HAL_I2C_Mem_Read(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											data, length, HAL_MAX_DELAY);
+											data, length, 100);
 }
+
+void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
+{
+	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, bank);
+	I2C_Write(ICM20948_ADDR, reg, data);
+}
+void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length)
+{
+	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, bank);
+	I2C_Read(ICM20948_ADDR, reg, data, length);
+}
+
 void ICM_SlaveWrite(uint16_t addr, uint8_t reg, uint8_t data)
 {
 	uint8_t buff = data;
 	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT,
-											&buff, 1, HAL_MAX_DELAY);
+											&buff, 1, 100);
 }
 
-void ICM_Init()
+void ICM_Init(GyroConfig gyro, AccelConfig accel)
 {
 	ICM_Reset();
 	HAL_Delay(100);
 
-	ICM_ChangeBank(BANK_0);
 	ICM_WakeUp();
 
-	ICM_ChangeBank(BANK_2);
-	ICM_GYRO_Config(&gyro, _4xg);
-	ICM_ACCEL_Config(&accel, _1_4xa);
+	ICM_GYRO_Config(&gyro);
+	ICM_ACCEL_Config(&accel);
 
 	ICM_SMPLRT_Divide(&gyro, &accel);
 	ICM_READ_WhoAmI();
 }
 void ICM_Reset()
 {
-	I2C_Write(ICM20948_ADDR, PWR_MGMT_1, 0x80);
+	ICM_Write(BANK_0, PWR_MGMT_1, 0x80);
 }
 void ICM_READ_WhoAmI()
 {
 	uint8_t responseAddr = 0;
-	I2C_Read(ICM20948_ADDR, WHO_AM_I, &responseAddr, 1);
+	ICM_Read(BANK_0, WHO_AM_I, &responseAddr, 1);
 	if (responseAddr == 0xEA)  printf("OK \n\r");
 	else  printf("Don't find ICM");
 }
 void ICM_WakeUp()
 {
-  I2C_Write(ICM20948_ADDR, PWR_MGMT_1, 0x01);
+	ICM_Write(BANK_0, PWR_MGMT_1, 0x01);
+	ICM_Write(BANK_0, PWR_MGMT_2, 0x00);
+	ICM_Write(BANK_0, LP_CONFIG, 0x00);
 
-  I2C_Write(ICM20948_ADDR, PWR_MGMT_2, 0x00);
-
-	I2C_Write(ICM20948_ADDR, LP_CONFIG, 0x00);
+	ICM_Write(BANK_2, ODR_ALIGN_EN, 0x01);
 }
-void ICM_ChangeBank(uint8_t bank)
-{
-	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, bank);
-}
-void ICM_GYRO_Config(GyroConfig *gyro, gyroavg_t avg)
+void ICM_GYRO_Config(GyroConfig *gyro)
 {
 	uint8_t config = gyro->dlpf_cfg << 3 | gyro->fs_sel << 1 | gyro->dlpf_en;
-	I2C_Write(ICM20948_ADDR, GYRO_CONFIG_1, config);
+	uint8_t sampleAvg = gyro->sample;
 
-	I2C_Write(ICM20948_ADDR, GYRO_CONFIG_2, (uint8_t)avg);
+	ICM_Write(BANK_2, GYRO_CONFIG_1, config);
+
+	ICM_Write(BANK_2, GYRO_CONFIG_2, sampleAvg);
 
 	switch (gyro->fs_sel) {
     case _250dps:  gyro->sensitivity = 131;   break;
@@ -83,12 +105,14 @@ void ICM_GYRO_Config(GyroConfig *gyro, gyroavg_t avg)
     case _2000dps: gyro->sensitivity = 16;    break;
   }
 }
-void ICM_ACCEL_Config(AccelConfig *accel, accelavg_t avg)
+void ICM_ACCEL_Config(AccelConfig *accel)
 {
 	uint8_t config = accel->dlpf_cfg << 3 | accel->fs_sel << 1 | accel->dlpf_en;
-	I2C_Write(ICM20948_ADDR, ACCEL_CONFIG, config);
+	uint8_t sampleAvg = accel->sample;
 
-	I2C_Write(ICM20948_ADDR, ACCEL_CONFIG_2, (uint8_t)avg);
+	ICM_Write(BANK_2, ACCEL_CONFIG, config);
+
+	ICM_Write(BANK_2, ACCEL_CONFIG_2, sampleAvg);
 
 	switch (accel->fs_sel) {
     case _2g:  accel->sensitivity = 16384; break;
@@ -99,14 +123,23 @@ void ICM_ACCEL_Config(AccelConfig *accel, accelavg_t avg)
 }
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel)
 {
-	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, BANK_2);
-	I2C_Write(ICM20948_ADDR, GYRO_SMPLRT_DIV, gyro->odr);
-	I2C_Write(ICM20948_ADDR, ACCEL_SMPLRT_DIV_1, (accel->odr >> 8) & 0x0F);
-	I2C_Write(ICM20948_ADDR, ACCEL_SMPLRT_DIV_2, accel->odr);
+	ICM_Write(BANK_2, GYRO_SMPLRT_DIV, gyro->odr);
+
+	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_1, (accel->odr >> 8) & 0x0F);
+	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_2, accel->odr);
 }
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel)
 {
+	imu_data = ICM_Read(BANK_0, ACCEL_DATA, data, 14);
+
+	accel->x_data = (int16_t)(data[0] << 8 | data[1]);
+	accel->y_data = (int16_t)(data[2] << 8 | data[3]);
+	accel->z_data = (int16_t)(data[4] << 8 | data[5]);
+	gyro->x_data = (int16_t)(data[8] << 8 | data[9]);
+	gyro->y_data = (int16_t)(data[10] << 8 | data[11]);
+	gyro->z_data = (int16_t)(data[12] << 8 | data[13]);
+
 	printf("Gyro X: %d, Y: %d, Z: %d\n", gyro->x_data, gyro->y_data, gyro->z_data);
 	printf("Accel X: %d, Y: %d, Z: %d\n", accel->x_data, accel->y_data, accel->z_data);
 }

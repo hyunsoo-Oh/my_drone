@@ -1,0 +1,21 @@
+I2C_Address 7-bit 0b110 1000 (AD0 == LOW)
+
+REG_BANK_SEL 0x7F -> BANK_0, BANK_1, BANK_2, BANK_3
+
+BANK_0
+- WHO_AM_I R (0xEA)
+- USER_CTRL
+- LP_CONFIG
+- PWR_MGMT_1, PWR_MGMT_2
+- ACCEL_XOUT_H ~ GYRO_ZOUT_L
+
+BANK_1 -> Test를 위한 레지스터
+
+BANK_2
+- Sampling
+- config
+- ODR_ALIGN_EN
+
+BANK_3 -> 외부 센서를 사용하기 위한 레지스터
+- I2C_MST_ODR_CONFIG
+- 
