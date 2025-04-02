@@ -66,10 +66,10 @@ typedef enum
 
 // 자이로스코프 설정 구조체
 typedef struct {
-	uint8_t fs_sel;         // Full-Scale Range 선택
+	gscale_t fs_sel;         // Full-Scale Range 선택
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
+	uint8_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
 	gyroavg_t sample;		// 센서 데이터 읽는 속도 조절
 	uint8_t odr;            // Output Data Rate (Hz)
 	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
@@ -79,7 +79,7 @@ typedef struct {
 
 // 가속도계 설정 구조체
 typedef struct {
-	uint8_t fs_sel;        // Full-Scale Range 선택
+	ascale_t fs_sel;        // Full-Scale Range 선택
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
 	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)

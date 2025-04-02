@@ -21,7 +21,7 @@ void ICM_GET_SENSOR_DATA_average(float *gyro, float *accel, uint8_t samples)
 
 	for (uint8_t i = 0; i < samples; i++)
 	{
-		ICM_Read(BANK_0, ACCEL_DATA, data, l2);
+		ICM_Read(BANK_0, ACCEL_DATA, data, 12);
 
 		sum_accel[0] = sum_accel[0] + (int16_t)(data[0] << 8 | data[1]);
 		sum_accel[1] = sum_accel[1] + (int16_t)(data[2] << 8 | data[3]);

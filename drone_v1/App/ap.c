@@ -17,14 +17,14 @@ void apInit()
 	ICM_Init(gyro, accel);
 
 	// Self-Test 수행
-	ICM_SELF_TEST_Init();
+//	ICM_SELF_TEST_Init();
 }
 
 void apMain()
 {
 	while(1)
 	{
-		ICM_RAW_GetData(&gyro, &accel);
+		ICM_GetScaledData(&gyro, &accel);
 		HAL_Delay(500);
 	}
 }

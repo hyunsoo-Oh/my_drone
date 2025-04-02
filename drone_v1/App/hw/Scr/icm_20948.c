@@ -9,22 +9,28 @@
 
 uint8_t imu_data[22];
 
+uint8_t test = 0;
+
 GyroConfig gyro = {
 	.fs_sel = _250dps,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
 	.sample = _1xg,
-	.odr = 100
+	.odr = 100,
+	.x_data = 0,
+	.y_data = 0,
+	.z_data = 0
 };
 AccelConfig accel = {
 	.fs_sel = _2g,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
 	.sample = _1_4xa,
-	.odr = 100
+	.odr = 100,
+	.x_data = 0,
+	.y_data = 0,
+	.z_data = 0
 };
-
-ICM_Init(gyro, accel);
 
 
 void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data)
@@ -101,6 +107,7 @@ void ICM_GYRO_Config(GyroConfig *gyro)
 		case _1000dps: gyro->sensitivity = 32;    break;
 		case _2000dps: gyro->sensitivity = 16;    break;
 	}
+//	test = gyro->sensitivity;
 }
 void ICM_ACCEL_Config(AccelConfig *accel)
 {
@@ -128,20 +135,23 @@ void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel)
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel)
 {
-	imu_data = ICM_Read(BANK_0, ACCEL_DATA, data, 14);
+	ICM_Read(BANK_0, ACCEL_DATA, imu_data, 14);
 
-	accel->x_data = (int16_t)(data[0] << 8 | data[1]);
-	accel->y_data = (int16_t)(data[2] << 8 | data[3]);
-	accel->z_data = (int16_t)(data[4] << 8 | data[5]);
-	gyro->x_data = (int16_t)(data[8] << 8 | data[9]);
-	gyro->y_data = (int16_t)(data[10] << 8 | data[11]);
-	gyro->z_data = (int16_t)(data[12] << 8 | data[13]);
+	accel->x_data = (int16_t)(imu_data[0] << 8 | imu_data[1]);
+	accel->y_data = (int16_t)(imu_data[2] << 8 | imu_data[3]);
+	accel->z_data = (int16_t)(imu_data[4] << 8 | imu_data[5]);
 
-	printf("Gyro X: %d, Y: %d, Z: %d\n", gyro->x_data, gyro->y_data, gyro->z_data);
-	printf("Accel X: %d, Y: %d, Z: %d\n", accel->x_data, accel->y_data, accel->z_data);
+	gyro->x_data = (int16_t)(imu_data[8] << 8 | imu_data[9]);
+	gyro->y_data = (int16_t)(imu_data[10] << 8 | imu_data[11]);
+	gyro->z_data = (int16_t)(imu_data[12] << 8 | imu_data[13]);
+
+//	printf("Gyro X: %d, Y: %d, Z: %d\n", gyro->x_data, gyro->y_data, gyro->z_data);
+//	printf("Accel X: %d, Y: %d, Z: %d\n", accel->x_data, accel->y_data, accel->z_data);
 }
 void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel)
 {
+	ICM_RAW_GetData(gyro, accel);
+
 	float gyro_x_dps = (float)gyro->x_data / gyro->sensitivity;
 	float gyro_y_dps = (float)gyro->y_data / gyro->sensitivity;
 	float gyro_z_dps = (float)gyro->z_data / gyro->sensitivity;
