@@ -1,0 +1,18 @@
+I2C_Address 7-bit 0b1110111 (SDO == HIGH) (0x77 << 1)
+
+BMP280 Mode - Sleep, Normal, Forced mode
+
+
+Register
+- 0xFC	temp_xlsb
+- 0xFB	temp_lsb
+- 0xFA	temp_msb
+- 0xF9	press_xlsb
+- 0xF8	press_lsb
+- 0xF7	press_msb
+- 0xF5	config
+- 0xF4	ctrl_meas
+- 0xF3 	status
+- 0xE0	Reset
+- 0xD0	ID (0x58)
+- 0xA1_88	Calib25_00

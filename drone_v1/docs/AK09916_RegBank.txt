@@ -1,0 +1,24 @@
+I2C_Address 7-bit 0b0001100 (0x0C << 1)
+
+Register
+- 0x00 WIA1 - Company ID (0x48)
+- 0x01 WIA2 - Device ID (0x09)
+- 0x02 Reserved
+- 0x03 Reserved
+- 0x10 ST1 - Status
+- 0x11 HXL - Measurement Magnetic Data
+- 0x12 HXH 0x13 HYL 0x14 HYH 0x15 HZL 0x16 HZH
+- 0x17 TMPS - Dummy
+- 0x18 ST2 - Status 2
+- 0x30 CNTL1 - Dummy
+- 0x31 CNTL2 - Control 2
+- 0x32 CNTL3 - Control 3
+- 0x33 TS1 - Test -> Do not Access
+- 0x34 TS2 - Test -> Do not Access
+
+ST1 Register
+	DRDY	'0' Normal	'1' Data is ready
+	DOR		'0' Normal	'1' Data overrun
+ST2 Register
+	RSV30_28	Reserved Register for AKM
+	HOFL	'0' Normal	'1' Magnetic sensor overflow

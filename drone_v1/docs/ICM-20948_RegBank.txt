@@ -9,13 +9,32 @@ BANK_0
 - PWR_MGMT_1, PWR_MGMT_2
 - ACCEL_XOUT_H ~ GYRO_ZOUT_L
 
+- I2C_MST_STATUS
+
 BANK_1 -> Test를 위한 레지스터
+- SELF_TEST_X_GYRO
+- XA_OFFS_H -> Accel offset cancellation (Noise 제거)
 
 BANK_2
 - Sampling
 - config
 - ODR_ALIGN_EN
 
+- XG_OFFS_USRH -> Gyro offset cancellation (Noise 제거)
+
+- MOD_CTRL_USR 
+
 BANK_3 -> 외부 센서를 사용하기 위한 레지스터
 - I2C_MST_ODR_CONFIG
-- 
+- I2C_MST_CTRL
+- I2C_MST_DELAY_CTRL
+
+- I2C_SLV0_ADDR
+- I2C_SLV0_REG
+- I2C_SLV0_CTRL
+- I2C_SLV0_DO
+
+Offset : 센서 또는 측정 시스템에서 실제 값이 0일 때 출력되는 값
+	측정값의 기준점에서의 편차 -> 온도 센서 2도 실제 온도 0도 = Offset 2도
+Bias removal : 측정값에서 Offset을 제거하여 정확한 값을 얻는 과정
+	Offset을 보정하거나 제거 즉, 측정한 값에서 일정한 오차를 제거

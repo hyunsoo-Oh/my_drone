@@ -9,12 +9,12 @@
 #define HW_INC_ICM_20948_H_
 
 #include "def.h"
-#include "i2c.h"
+#include "bsp.h"
 #include "usart.h"
 
-#define ICM20948_ADDR  			0x68 << 1
+//#include "icm_20948_offset.h"
 
-#define I2C_BUS      				&hi2c1
+#define ICM20948_ADDR  			0x68 << 1
 
 #define USER_BANK_SEL  			0x7F
 
@@ -29,19 +29,19 @@
 #define PWR_MGMT_1     			0x06
 #define PWR_MGMT_2     			0x07
 
-#define ACCEL_DATA   				0x2D
-#define GYRO_DATA    				0x33
+#define ACCEL_DATA   			0x2D
+#define GYRO_DATA    			0x33
 
 #define GYRO_CONFIG_1  			0x01  // BANK2
 #define GYRO_CONFIG_2  			0x02
 #define ACCEL_CONFIG   			0x14
 #define ACCEL_CONFIG_2 			0x15
 
-#define ODR_ALIGN_EN				0x09
+#define ODR_ALIGN_EN			0x09
 
-#define GYRO_SMPLRT_DIV     0x00
-#define ACCEL_SMPLRT_DIV_1  0x10
-#define ACCEL_SMPLRT_DIV_2  0x11
+#define GYRO_SMPLRT_DIV 	    0x00
+#define ACCEL_SMPLRT_DIV_1  	0x10
+#define ACCEL_SMPLRT_DIV_2  	0x11
 
 #define SLV_READ       			0x80
 #define SLV_WRITE      			0x00
@@ -90,26 +90,28 @@ typedef struct {
 	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
 } AccelConfig;
 
+//typedef struct {
+//
+//} SLVConfig;
+
 //int16_t mag_X = 0;
 //int16_t mag_Y = 0;
 //int16_t mag_Z = 0;
 
-void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data);
-void I2C_Read(uint8_t addr, uint8_t reg, uint8_t *data, uint8_t length);
-
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data);
 void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length);
-void ICM_SlaveWrite(uint16_t bank, uint8_t reg, uint8_t data);
+void ICM_SLV_Write(uint16_t bank, uint8_t reg, uint8_t data);
 
-void ICM_Init(GyroConfig gyro, AccelConfig accel);
+void ICM_Init(GyroConfig *gyro, AccelConfig *accel);
 void ICM_Reset();
 void ICM_READ_WhoAmI();
-void ICM_WakeUp();
 void ICM_GYRO_Config(GyroConfig *gyro);
 void ICM_ACCEL_Config(AccelConfig *accel);
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);
 void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
+
+//void ICM_SLV_
 
 #endif /* HW_INC_ICM_20948_H_ */

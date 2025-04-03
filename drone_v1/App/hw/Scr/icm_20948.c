@@ -5,16 +5,15 @@
  *      Author: USER
  */
 
-#include "Inc/icm_20948.h"
+#include "icm_20948.h"
 
 uint8_t imu_data[22];
-
-uint8_t test = 0;
 
 GyroConfig gyro = {
 	.fs_sel = _250dps,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
+	.sensitivity = 0,
 	.sample = _1xg,
 	.odr = 100,
 	.x_data = 0,
@@ -25,23 +24,13 @@ AccelConfig accel = {
 	.fs_sel = _2g,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
+	.sensitivity = 0,
 	.sample = _1_4xa,
 	.odr = 100,
 	.x_data = 0,
 	.y_data = 0,
 	.z_data = 0
 };
-
-
-void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data)
-{
-	uint8_t buff = data;
-	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, &buff, 1, 100);
-}
-void I2C_Read(uint8_t addr, uint8_t reg, uint8_t *data, uint8_t length)
-{
-	HAL_I2C_Mem_Read(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, data, length, 100);
-}
 
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
 {
@@ -54,23 +43,27 @@ void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length)
 	I2C_Read(ICM20948_ADDR, reg, data, length);
 }
 
-void ICM_SlaveWrite(uint16_t addr, uint8_t reg, uint8_t data)
+void ICM_SLV_Write(uint16_t addr, uint8_t reg, uint8_t data)
 {
 	uint8_t buff = data;
 	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, &buff, 1, 100);
 }
 
-void ICM_Init(GyroConfig gyro, AccelConfig accel)
+void ICM_Init(GyroConfig *gyro, AccelConfig *accel)
 {
 	ICM_Reset();
 	HAL_Delay(100);
 
-	ICM_WakeUp();
+	ICM_Write(BANK_0, PWR_MGMT_1, 0x01);
+	ICM_Write(BANK_0, PWR_MGMT_2, 0x00);
+	ICM_Write(BANK_0, LP_CONFIG, 0x00);
 
-	ICM_GYRO_Config(&gyro);
-	ICM_ACCEL_Config(&accel);
+	ICM_Write(BANK_2, ODR_ALIGN_EN, 0x01);
 
-	ICM_SMPLRT_Divide(&gyro, &accel);
+	ICM_GYRO_Config(gyro);
+	ICM_ACCEL_Config(accel);
+
+	ICM_SMPLRT_Divide(gyro, accel);
 	ICM_READ_WhoAmI();
 }
 void ICM_Reset()
@@ -83,14 +76,6 @@ void ICM_READ_WhoAmI()
 	ICM_Read(BANK_0, WHO_AM_I, &responseAddr, 1);
 	if (responseAddr == 0xEA)	printf("OK \n\r");
 	else 	printf("Don't find ICM");
-}
-void ICM_WakeUp()
-{
-	ICM_Write(BANK_0, PWR_MGMT_1, 0x01);
-	ICM_Write(BANK_0, PWR_MGMT_2, 0x00);
-	ICM_Write(BANK_0, LP_CONFIG, 0x00);
-
-	ICM_Write(BANK_2, ODR_ALIGN_EN, 0x01);
 }
 void ICM_GYRO_Config(GyroConfig *gyro)
 {
@@ -107,7 +92,6 @@ void ICM_GYRO_Config(GyroConfig *gyro)
 		case _1000dps: gyro->sensitivity = 32;    break;
 		case _2000dps: gyro->sensitivity = 16;    break;
 	}
-//	test = gyro->sensitivity;
 }
 void ICM_ACCEL_Config(AccelConfig *accel)
 {
