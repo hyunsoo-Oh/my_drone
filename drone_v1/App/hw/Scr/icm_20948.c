@@ -5,7 +5,7 @@
  *      Author: USER
  */
 
-#include "icm_20948.h"
+#include "Inc/icm_20948.h"
 
 uint8_t imu_data[22];
 

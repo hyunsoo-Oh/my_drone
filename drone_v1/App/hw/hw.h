@@ -10,8 +10,8 @@
 
 #include "def.h"
 #include "usart.h"
-#include "icm_20948_test.h"
-#include "icm_20948.h"
+#include "Inc/icm_20948_test.h"
+#include "Inc/icm_20948.h"
 
 void hwInit(void);
 

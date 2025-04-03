@@ -9,7 +9,7 @@
 #define HW_INC_ICM_20948_H_
 
 #include "def.h"
-#include "bsp.h"
+#include "bsp/bsp.h"
 #include "usart.h"
 
 //#include "icm_20948_offset.h"
@@ -48,11 +48,11 @@
 
 typedef enum
 {
-	_250dps,	_500dps,	_1000dps,	_2000dps
+	_250dps, _500dps, _1000dps,	_2000dps
 } gscale_t;
 typedef enum
 {
-	_2g,	_4g, _8g, _16g
+	_2g, _4g, _8g, _16g
 } ascale_t;
 
 typedef enum
