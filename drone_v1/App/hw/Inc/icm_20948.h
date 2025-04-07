@@ -9,7 +9,7 @@
 #define HW_INC_ICM_20948_H_
 
 #include "def.h"
-#include "bsp.h"
+#include "bsp/bsp.h"
 #include "usart.h"
 
 //#include "icm_20948_offset.h"
@@ -43,6 +43,20 @@
 #define ACCEL_SMPLRT_DIV_1  	0x10
 #define ACCEL_SMPLRT_DIV_2  	0x11
 
+#define MST_ODR_CONFIG			0x00  // BANK3
+#define MST_CTRL				0x01
+#define MST_DELAY_CTRL			0x02
+
+#define SLV0_ADDR				0x03
+#define SLV0_REG				0x04
+#define SLV0_CTRL				0x05
+#define SLV0_DO					0x06
+
+#define SLV1_ADDR				0x07
+#define SLV1_REG				0x08
+#define SLV1_CTRL				0x09
+#define SLV1_DO					0x10
+
 #define SLV_READ       			0x80
 #define SLV_WRITE      			0x00
 
@@ -64,30 +78,31 @@ typedef enum
 	_1_4xa, _8xa, _16xa, _32xa
 } accelavg_t;
 
+// 구조체 Padding을 고려한 구조체 설계
 // 자이로스코프 설정 구조체
 typedef struct {
-	gscale_t fs_sel;         // Full-Scale Range 선택
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint8_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	gyroavg_t sample;		// 센서 데이터 읽는 속도 조절
 	uint8_t odr;            // Output Data Rate (Hz)
+	uint8_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
 	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (GYRO_YOUT_H/L)
 	int16_t z_data;         // Z축 데이터 (GYRO_ZOUT_H/L)
+	gscale_t fs_sel;         // Full-Scale Range 선택
+	gyroavg_t sample;		// 센서 데이터 읽는 속도 조절
 } GyroConfig;
 
 // 가속도계 설정 구조체
 typedef struct {
-	ascale_t fs_sel;        // Full-Scale Range 선택
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
-	accelavg_t sample;		// 센서 데이터 읽는 속도 조절
 	uint16_t odr;           // Output Data Rate (Hz)
+	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
 	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
 	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
+	ascale_t fs_sel;        // Full-Scale Range 선택
+	accelavg_t sample;		// 센서 데이터 읽는 속도 조절
 } AccelConfig;
 
 //typedef struct {
@@ -100,9 +115,9 @@ typedef struct {
 
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data);
 void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length);
-void ICM_SLV_Write(uint16_t bank, uint8_t reg, uint8_t data);
+void ICM_SLV_Write(uint8_t slv, uint16_t addr, uint8_t reg, uint8_t data);
 
-void ICM_Init(GyroConfig *gyro, AccelConfig *accel);
+void ICM_Init();
 void ICM_Reset();
 void ICM_READ_WhoAmI();
 void ICM_GYRO_Config(GyroConfig *gyro);
@@ -112,6 +127,7 @@ void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);
 void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
 
-//void ICM_SLV_
+void AK09916_MAG_Init();
+void BMP280_PRESS_Init();
 
 #endif /* HW_INC_ICM_20948_H_ */

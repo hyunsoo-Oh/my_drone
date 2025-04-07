@@ -5,51 +5,63 @@
  *      Author: USER
  */
 
-#include "icm_20948.h"
+#include "Inc/icm_20948.h"
 
 uint8_t imu_data[22];
 
 GyroConfig gyro = {
-	.fs_sel = _250dps,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
-	.sensitivity = 0,
-	.sample = _1xg,
 	.odr = 100,
+	.sensitivity = 0,
 	.x_data = 0,
 	.y_data = 0,
-	.z_data = 0
+	.z_data = 0,
+	.fs_sel = _250dps,
+	.sample = _1xg
 };
 AccelConfig accel = {
-	.fs_sel = _2g,
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
-	.sensitivity = 0,
-	.sample = _1_4xa,
 	.odr = 100,
+	.sensitivity = 0,
 	.x_data = 0,
 	.y_data = 0,
-	.z_data = 0
+	.z_data = 0,
+	.fs_sel = _2g,
+	.sample = _1_4xa
 };
 
+// BANK_n의 reg 주소에 데이터 쓰기
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
 {
 	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, bank);
 	I2C_Write(ICM20948_ADDR, reg, data);
 }
+// BANK_n의 reg 주소에 데이터 일기
 void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length)
 {
 	I2C_Write(ICM20948_ADDR, USER_BANK_SEL, bank);
 	I2C_Read(ICM20948_ADDR, reg, data, length);
 }
 
-void ICM_SLV_Write(uint16_t addr, uint8_t reg, uint8_t data)
+void ICM_SLV_Write(uint8_t slv, uint16_t addr, uint8_t reg, uint8_t data)
 {
-	uint8_t buff = data;
-	HAL_I2C_Mem_Write(I2C_BUS, addr, reg, I2C_MEMADD_SIZE_8BIT, &buff, 1, 100);
+	ICM_Write(BANK_3, slv, addr);			// SLV Sensor Address
+	ICM_Write(BANK_3, slv+1, reg);			// SLV Sensor Register Address
+	ICM_Write(BANK_3, slv+3, data);			// Write Data
+	ICM_Write(BANK_3, slv+2, SLV_Write);	// Write Enable
+	HAL_Delay(5);
+}
+ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t ctrl)
+{
+	ICM_Write(BANK_3, slv, SLV_READ | addr);	// SLV Sensor Address
+	ICM_Write(BANK_3, slv+1, reg);				// SLV Sensor Register Address
+	ICM_Write(BANK_3, slv+2, SLV_READ | ctrl);	// Read Data + Length
+	HAL_Delay(5);
 }
 
-void ICM_Init(GyroConfig *gyro, AccelConfig *accel)
+void ICM_Init()
 {
 	ICM_Reset();
 	HAL_Delay(100);
@@ -58,13 +70,15 @@ void ICM_Init(GyroConfig *gyro, AccelConfig *accel)
 	ICM_Write(BANK_0, PWR_MGMT_2, 0x00);
 	ICM_Write(BANK_0, LP_CONFIG, 0x00);
 
+	ICM_READ_WhoAmI();
+
 	ICM_Write(BANK_2, ODR_ALIGN_EN, 0x01);
 
-	ICM_GYRO_Config(gyro);
-	ICM_ACCEL_Config(accel);
+	ICM_GYRO_Config(&gyro);
+	ICM_ACCEL_Config(&accel);
 
-	ICM_SMPLRT_Divide(gyro, accel);
-	ICM_READ_WhoAmI();
+	ICM_SMPLRT_Divide(&gyro, &accel);
+
 }
 void ICM_Reset()
 {
@@ -146,4 +160,16 @@ void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel)
 
 	printf("Gyro (dps) - X: %.2f, Y: %.2f, Z: %.2f\n", gyro_x_dps, gyro_y_dps, gyro_z_dps);
 	printf("Accel (g) - X: %.2f, Y: %.2f, Z: %.2f\n", accel_x_g, accel_y_g, accel_z_g);
+}
+
+void AK09916_MAG_Init()
+{
+	ICM_SLV_Write(SLV0_ADDR, AK09916_ADDR, reg, data);
+
+	ICM_SLV_Ctrl(SLV0_ADDR, AK09916_ADDR, AK_MEASURE_MAG_XL, 0x08);
+}
+void BMP280_PRESS_Init()
+{
+
+	ICM_SLV_Ctrl(SLV1_ADDR, BMP280_ADDR, reg, 0x08);
 }

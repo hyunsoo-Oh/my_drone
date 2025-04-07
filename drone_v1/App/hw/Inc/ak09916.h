@@ -11,7 +11,7 @@
 #include "def.h"
 #include "bsp.h"
 
-#define
+#define AK09916_ADDR		0x0C
 
 #define AK_COMPANY_ID		0x00 // 0x48
 #define AK_DEVICE_ID		0x01 // 0x09
