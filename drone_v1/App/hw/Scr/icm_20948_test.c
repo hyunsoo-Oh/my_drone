@@ -40,6 +40,7 @@ void ICM_GET_SENSOR_DATA_average(float *gyro, float *accel, uint8_t samples)
 void ICM_SELF_TEST_Init()
 {
 	uint8_t self_test_vals[6];
+	float gyro_offset[3], accel_offset[3];
 
 	ICM_Write(BANK_2, GYRO_CONFIG_2, GYRO_ST_DISEN);
 	ICM_Write(BANK_2, ACCEL_CONFIG_2, ACCEL_ST_DISEN);
@@ -70,6 +71,18 @@ void ICM_SELF_TEST_Init()
 						(gyro_response >= 50.0f && gyro_response <= 150.0f) ? "PASS" : "FAIL");
 		printf("Accel[%d] Self-Test Response: %.2f%% -> %s\n", i, accel_response,
 						(accel_response >= 50.0f && accel_response <= 150.0f) ? "PASS" : "FAIL");
+	}
+	// Offset 계싼
+	for (int i = 0; i < 3; i++)
+	{
+		gyro_offset[i] = -st_data.baseline_gyro[i]; // 자이로스코프 오프셋 (LSB)
+		if (i < 2) {
+			accel_offset[i] = -st_data.baseline_accel[i]; // x, y축 오프셋
+		} else {
+			accel_offset[i] = -(st_data.baseline_accel[i] - 16384); // z축 오프셋 (중력 보정)
+		}
+		printf("Gyro[%d] Offset: %.2f LSB\n", i, gyro_offset[i]);
+		printf("Accel[%d] Offset: %.2f LSB\n", i, accel_offset[i]);
 	}
 	ICM_Write(BANK_2, GYRO_CONFIG_2, GYRO_ST_DISEN);
 	ICM_Write(BANK_2, ACCEL_CONFIG_2, ACCEL_ST_DISEN);

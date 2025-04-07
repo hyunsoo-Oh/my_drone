@@ -9,7 +9,7 @@
 #define HW_INC_AK09916_H_
 
 #include "def.h"
-#include "bsp.h"
+#include "bsp/bsp.h"
 
 #define AK09916_ADDR		0x0C
 
@@ -28,5 +28,11 @@
 
 #define AK_CNTL_2			0x31
 #define AK_CNTL_3			0x32
+
+typedef struct {
+	uint16_t x_data;
+	uint16_t y_data;
+	uint16_t z_data;
+} MagData;
 
 #endif /* HW_INC_AK09916_H_ */

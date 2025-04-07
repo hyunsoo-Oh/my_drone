@@ -9,7 +9,7 @@
 #define HW_INC_BMP280_H_
 
 #include "def.h"
-#include "bsp.h"
+#include "bsp/bsp.h"
 
 #define BMP280_ADDR			0x77
 

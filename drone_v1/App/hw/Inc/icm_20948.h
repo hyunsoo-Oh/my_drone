@@ -12,6 +12,8 @@
 #include "bsp/bsp.h"
 #include "usart.h"
 
+#include "Inc/ak09916.h"
+#include "Inc/bmp280.h"
 //#include "icm_20948_offset.h"
 
 #define ICM20948_ADDR  			0x68 << 1
@@ -31,6 +33,18 @@
 
 #define ACCEL_DATA   			0x2D
 #define GYRO_DATA    			0x33
+
+#define USER_CTRL				0x03
+
+#define SLV_SENS_DATA_01		0x3C
+#define SLV_SENS_DATA_02		0x3D
+#define SLV_SENS_DATA_03		0x3E
+#define SLV_SENS_DATA_04		0x3F
+#define SLV_SENS_DATA_05		0x40
+#define SLV_SENS_DATA_06		0x41
+#define SLV_SENS_DATA_07		0x42
+#define SLV_SENS_DATA_08		0x43
+
 
 #define GYRO_CONFIG_1  			0x01  // BANK2
 #define GYRO_CONFIG_2  			0x02
@@ -83,8 +97,8 @@ typedef enum
 typedef struct {
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint8_t odr;            // Output Data Rate (Hz)
 	uint8_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
+	uint16_t odr;            // Output Data Rate (Hz)
 	int16_t x_data;         // X축 데이터 (GYRO_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (GYRO_YOUT_H/L)
 	int16_t z_data;         // Z축 데이터 (GYRO_ZOUT_H/L)
@@ -96,8 +110,8 @@ typedef struct {
 typedef struct {
 	uint8_t dlpf_en;        // DLPF Enable
 	uint8_t dlpf_cfg;       // Digital Low-Pass Filter 설정
-	uint16_t odr;           // Output Data Rate (Hz)
 	uint16_t sensitivity;   // LSB/g (실제 물리량으로 변환 계수)
+	uint16_t odr;           // Output Data Rate (Hz)
 	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
 	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
@@ -127,6 +141,7 @@ void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);
 void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
 
+void ICM_SLV_Init();
 void AK09916_MAG_Init();
 void BMP280_PRESS_Init();
 

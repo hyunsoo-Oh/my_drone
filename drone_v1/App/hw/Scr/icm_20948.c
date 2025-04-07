@@ -7,12 +7,10 @@
 
 #include "Inc/icm_20948.h"
 
-uint8_t imu_data[22];
-
 GyroConfig gyro = {
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
-	.odr = 100,
+	.odr = 250,
 	.sensitivity = 0,
 	.x_data = 0,
 	.y_data = 0,
@@ -23,7 +21,7 @@ GyroConfig gyro = {
 AccelConfig accel = {
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
-	.odr = 100,
+	.odr = 250,
 	.sensitivity = 0,
 	.x_data = 0,
 	.y_data = 0,
@@ -31,7 +29,11 @@ AccelConfig accel = {
 	.fs_sel = _2g,
 	.sample = _1_4xa
 };
-
+MagData mag = {
+	.x_data = 0,
+	.y_data = 0,
+	.z_data = 0
+};
 // BANK_n의 reg 주소에 데이터 쓰기
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
 {
@@ -50,10 +52,10 @@ void ICM_SLV_Write(uint8_t slv, uint16_t addr, uint8_t reg, uint8_t data)
 	ICM_Write(BANK_3, slv, addr);			// SLV Sensor Address
 	ICM_Write(BANK_3, slv+1, reg);			// SLV Sensor Register Address
 	ICM_Write(BANK_3, slv+3, data);			// Write Data
-	ICM_Write(BANK_3, slv+2, SLV_Write);	// Write Enable
+	ICM_Write(BANK_3, slv+2, SLV_WRITE);	// Write Enable
 	HAL_Delay(5);
 }
-ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t ctrl)
+void ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t ctrl)
 {
 	ICM_Write(BANK_3, slv, SLV_READ | addr);	// SLV Sensor Address
 	ICM_Write(BANK_3, slv+1, reg);				// SLV Sensor Register Address
@@ -79,6 +81,8 @@ void ICM_Init()
 
 	ICM_SMPLRT_Divide(&gyro, &accel);
 
+	ICM_SLV_Init();
+	AK09916_MAG_Init();
 }
 void ICM_Reset()
 {
@@ -125,14 +129,22 @@ void ICM_ACCEL_Config(AccelConfig *accel)
 }
 void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel)
 {
-	ICM_Write(BANK_2, GYRO_SMPLRT_DIV, gyro->odr);
+	uint16_t gyro_div = (1125 / gyro->odr) - 1;
+	uint16_t accel_div = (1125 / accel->odr) - 1;
 
-	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_1, (accel->odr >> 8) & 0x0F);
-	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_2, accel->odr);
+	// 디바이더 값이 유효 범위(0~255) 내에 있는지 확인
+	if (gyro_div > 255) gyro_div = 255;
+	if (accel_div > 255) accel_div = 255;
+
+	ICM_Write(BANK_2, GYRO_SMPLRT_DIV, (uint8_t)gyro_div);
+
+	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_1, (accel_div >> 8) & 0x0F);
+	ICM_Write(BANK_2, ACCEL_SMPLRT_DIV_2, accel_div);
 }
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel)
 {
+	uint8_t imu_data[14] = {0};
 	ICM_Read(BANK_0, ACCEL_DATA, imu_data, 14);
 
 	accel->x_data = (int16_t)(imu_data[0] << 8 | imu_data[1]);
@@ -162,14 +174,40 @@ void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel)
 	printf("Accel (g) - X: %.2f, Y: %.2f, Z: %.2f\n", accel_x_g, accel_y_g, accel_z_g);
 }
 
+void ICM_SLV_Init()
+{
+	ICM_Write(BANK_0, USER_CTRL, 0x02);		// I2C_MST_RST
+	HAL_Delay(100);
+
+	ICM_Write(BANK_0, USER_CTRL, 0x20);		// I2C_MST_EN
+	HAL_Delay(10);
+
+	ICM_Write(BANK_3, MST_CTRL, 0x07);		// I2C MST Clock 400 kHz
+	HAL_Delay(10);
+
+	ICM_Write(BANK_0, LP_CONFIG, 0x40);		// MST_CYCLE
+	HAL_Delay(10);
+
+	ICM_Write(BANK_3, MST_ODR_CONFIG, 0x03); // 1.1Hz/(2^3) = 136 Hz
+	HAL_Delay(10);
+}
 void AK09916_MAG_Init()
 {
-	ICM_SLV_Write(SLV0_ADDR, AK09916_ADDR, reg, data);
+	ICM_SLV_Write(SLV0_ADDR, AK09916_ADDR, AK_CNTL_3, 0x01); // MAG RESET
+	HAL_Delay(100);
 
-	ICM_SLV_Ctrl(SLV0_ADDR, AK09916_ADDR, AK_MEASURE_MAG_XL, 0x08);
+	// continuous mode 4 : 100Hz
+	ICM_SLV_Ctrl(SLV0_ADDR, AK09916_ADDR, AK_CNTL_2, 0x08);
 }
-void BMP280_PRESS_Init()
-{
 
-	ICM_SLV_Ctrl(SLV1_ADDR, BMP280_ADDR, reg, 0x08);
+void AK09916_RAW_GetData(MagData *mag)
+{
+	uint8_t imu_data[8] = {0};
+	ICM_Read(BANK_0, SLV_SENS_DATA_01, imu_data, 8);
+
+	mag->x_data = (int16_t)(imu_data[0] << 8 | imu_data[1]);
+	mag->y_data = (int16_t)(imu_data[2] << 8 | imu_data[3]);
+	mag->z_data = (int16_t)(imu_data[4] << 8 | imu_data[5]);
+
+	printf("MAG X : %d, Y : %d, Z : %d \n", mag->x_data, mag->y_data, mag->z_data);
 }
