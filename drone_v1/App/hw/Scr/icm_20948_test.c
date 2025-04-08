@@ -9,6 +9,8 @@
 
 SelfTest st_data;
 
+uint8_t self_test_vals[6]; // 디버깅 용
+
 float CALCULATE_FACTORY_Trim(uint8_t self_test_val) {
 	if (self_test_val == 0) return 0.0f; // 0이면 나누기 오류 방지
 	return FACTORY_TRIM_SCALE * (1.0f - powf(1.0f + self_test_val / 32.0f, -1.0f));
@@ -39,7 +41,7 @@ void ICM_GET_SENSOR_DATA_average(float *gyro, float *accel, uint8_t samples)
 
 void ICM_SELF_TEST_Init()
 {
-	uint8_t self_test_vals[6];
+//	uint8_t self_test_vals[6];
 	float gyro_offset[3], accel_offset[3];
 
 	ICM_Write(BANK_2, GYRO_CONFIG_2, GYRO_ST_DISEN);

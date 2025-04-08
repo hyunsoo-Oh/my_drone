@@ -28,14 +28,17 @@
 #define ZG_OFFS_USRL	0x08
 
 typedef struct {
-	uint16_t x_gyro;
-	uint16_t y_gyro;
-	uint16_t z_gyro;
 	uint16_t x_accel;
 	uint16_t y_accel;
 	uint16_t z_accel;
-} IcmOffset;
+	uint16_t x_gyro;
+	uint16_t y_gyro;
+	uint16_t z_gyro;
+} ICM_Offset;
 
-void ICM_REMOVE_Offset();
+void ICM_SetGyroOffset(int16_t offset_x, int16_t offset_y, int16_t offset_z);
+void ICM_SetAccelOffset(int16_t offset_x, int16_t offset_y, int16_t offset_z);
+void ICM_Calibrate(GyroConfig *gyro, AccelConfig *accel);
+void ICM_REMOVE_Offset(GyroConfig *gyro_config, AccelConfig *accel_config);
 
 #endif /* HW_INC_ICM_20948_OFFSET_H_ */

@@ -81,6 +81,7 @@ void ICM_Init()
 
 	ICM_SMPLRT_Divide(&gyro, &accel);
 
+	ICM_REMOVE_Offset(&gyro, &accel);
 	ICM_SLV_Init();
 	AK09916_MAG_Init();
 }

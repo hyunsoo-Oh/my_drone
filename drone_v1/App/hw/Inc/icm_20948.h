@@ -143,6 +143,5 @@ void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
 
 void ICM_SLV_Init();
 void AK09916_MAG_Init();
-void BMP280_PRESS_Init();
 
 #endif /* HW_INC_ICM_20948_H_ */
