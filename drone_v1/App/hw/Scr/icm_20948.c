@@ -18,6 +18,7 @@ GyroConfig gyro = {
 	.fs_sel = _250dps,
 	.sample = _1xg
 };
+
 AccelConfig accel = {
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
@@ -29,11 +30,15 @@ AccelConfig accel = {
 	.fs_sel = _2g,
 	.sample = _1_4xa
 };
+
 MagData mag = {
 	.x_data = 0,
 	.y_data = 0,
 	.z_data = 0
 };
+
+extern IcmOffset offset;
+
 // BANK_n의 reg 주소에 데이터 쓰기
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data)
 {
@@ -55,11 +60,11 @@ void ICM_SLV_Write(uint8_t slv, uint16_t addr, uint8_t reg, uint8_t data)
 	ICM_Write(BANK_3, slv+2, SLV_WRITE);	// Write Enable
 	HAL_Delay(5);
 }
-void ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t ctrl)
+void ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t length)
 {
 	ICM_Write(BANK_3, slv, SLV_READ | addr);	// SLV Sensor Address
 	ICM_Write(BANK_3, slv+1, reg);				// SLV Sensor Register Address
-	ICM_Write(BANK_3, slv+2, SLV_READ | ctrl);	// Read Data + Length
+	ICM_Write(BANK_3, slv+2, 0x80 | length);	// Read Data + Length
 	HAL_Delay(5);
 }
 
@@ -67,6 +72,8 @@ void ICM_Init()
 {
 	ICM_Reset();
 	HAL_Delay(100);
+
+//	ICM_SLV_WhoAmI(0, AK09916_ADDR << 1, AK_DEVICE_ID, 0x09);
 
 	ICM_Write(BANK_0, PWR_MGMT_1, 0x01);
 	ICM_Write(BANK_0, PWR_MGMT_2, 0x00);
@@ -81,8 +88,12 @@ void ICM_Init()
 
 	ICM_SMPLRT_Divide(&gyro, &accel);
 
+	ICM_REMOVE_Offset(&gyro, &accel);
+
 	ICM_SLV_Init();
 	AK09916_MAG_Init();
+
+	ICM_SLV_Ctrl(SLV0_ADDR, AK09916_ADDR, AK_MEASURE_MAG_XL, 8);
 }
 void ICM_Reset()
 {
@@ -93,7 +104,7 @@ void ICM_READ_WhoAmI()
 	uint8_t responseAddr = 0;
 	ICM_Read(BANK_0, WHO_AM_I, &responseAddr, 1);
 	if (responseAddr == 0xEA)	printf("OK \n\r");
-	else 	printf("Don't find ICM");
+	else 						printf("Don't find ICM \n\r");
 }
 void ICM_GYRO_Config(GyroConfig *gyro)
 {
@@ -162,13 +173,22 @@ void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel)
 {
 	ICM_RAW_GetData(gyro, accel);
 
-	float gyro_x_dps = (float)gyro->x_data / gyro->sensitivity;
-	float gyro_y_dps = (float)gyro->y_data / gyro->sensitivity;
-	float gyro_z_dps = (float)gyro->z_data / gyro->sensitivity;
+//	// OFFSET 레지스터 기반 보정 시 사용 (현재 오류)
+//	float gyro_x_dps = (float)gyro->x_data / gyro->sensitivity;
+//	float gyro_y_dps = (float)gyro->y_data / gyro->sensitivity;
+//	float gyro_z_dps = (float)gyro->z_data / gyro->sensitivity;
+//
+//	float accel_x_g = (float)accel->x_data / accel->sensitivity;
+//	float accel_y_g = (float)accel->y_data / accel->sensitivity;
+//	float accel_z_g = (float)accel->z_data / accel->sensitivity;
 
-	float accel_x_g = (float)accel->x_data / accel->sensitivity;
-	float accel_y_g = (float)accel->y_data / accel->sensitivity;
-	float accel_z_g = (float)accel->z_data / accel->sensitivity;
+	float gyro_x_dps = ((float)gyro->x_data + offset.x_gyro) / gyro->sensitivity;
+	float gyro_y_dps = ((float)gyro->y_data + offset.y_gyro) / gyro->sensitivity;
+	float gyro_z_dps = ((float)gyro->z_data + offset.z_gyro) / gyro->sensitivity;
+
+	float accel_x_g = ((float)accel->x_data + offset.x_accel) / accel->sensitivity;
+	float accel_y_g = ((float)accel->y_data + offset.y_accel) / accel->sensitivity;
+	float accel_z_g = ((float)accel->z_data + offset.z_accel) / accel->sensitivity;
 
 	printf("Gyro (dps) - X: %.2f, Y: %.2f, Z: %.2f\n", gyro_x_dps, gyro_y_dps, gyro_z_dps);
 	printf("Accel (g) - X: %.2f, Y: %.2f, Z: %.2f\n", accel_x_g, accel_y_g, accel_z_g);
@@ -191,13 +211,30 @@ void ICM_SLV_Init()
 	ICM_Write(BANK_3, MST_ODR_CONFIG, 0x03); // 1.1Hz/(2^3) = 136 Hz
 	HAL_Delay(10);
 }
+
+void ICM_SLV_WhoAmI(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t id)
+{
+	uint8_t responseAddr = 0;
+	ICM_Write(BANK_0, USER_CTRL, 0x00);
+	ICM_Write(BANK_0, INT_PIN_CFG, 0x02);
+	HAL_Delay(10);
+
+	I2C_Read(addr, reg, &responseAddr, 1);
+	if (responseAddr == id)		printf("SLV%d OK \n\r", slv);
+	else 						printf("Don't find SLV%d \n\r", slv);
+
+	HAL_Delay(10);
+	ICM_Write(BANK_0, INT_PIN_CFG, 0x00);
+	ICM_Write(BANK_0, USER_CTRL, 0x20);
+}
+
 void AK09916_MAG_Init()
 {
 	ICM_SLV_Write(SLV0_ADDR, AK09916_ADDR, AK_CNTL_3, 0x01); // MAG RESET
 	HAL_Delay(100);
 
 	// continuous mode 4 : 100Hz
-	ICM_SLV_Ctrl(SLV0_ADDR, AK09916_ADDR, AK_CNTL_2, 0x08);
+	ICM_SLV_Write(SLV0_ADDR, AK09916_ADDR, AK_CNTL_2, 0x08);
 }
 
 void AK09916_RAW_GetData(MagData *mag)
@@ -205,9 +242,9 @@ void AK09916_RAW_GetData(MagData *mag)
 	uint8_t imu_data[8] = {0};
 	ICM_Read(BANK_0, SLV_SENS_DATA_01, imu_data, 8);
 
-	mag->x_data = (int16_t)(imu_data[0] << 8 | imu_data[1]);
-	mag->y_data = (int16_t)(imu_data[2] << 8 | imu_data[3]);
-	mag->z_data = (int16_t)(imu_data[4] << 8 | imu_data[5]);
+	mag->x_data = (int16_t)(imu_data[1] << 8 | imu_data[0]);
+	mag->y_data = (int16_t)(imu_data[3] << 8 | imu_data[2]);
+	mag->z_data = (int16_t)(imu_data[5] << 8 | imu_data[4]);
 
 	printf("MAG X : %d, Y : %d, Z : %d \n", mag->x_data, mag->y_data, mag->z_data);
 }

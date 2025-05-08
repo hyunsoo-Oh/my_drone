@@ -5,7 +5,7 @@
  *      Author: USER
  */
 
-#include "Inc/icm_20948_test.h"
+#include "Inc/icm_20948.h"
 
 SelfTest st_data;
 

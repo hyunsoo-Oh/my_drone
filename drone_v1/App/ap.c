@@ -9,6 +9,7 @@
 
 extern GyroConfig gyro;
 extern AccelConfig accel;
+extern MagData mag;
 
 void apInit()
 {
@@ -24,7 +25,8 @@ void apMain()
 {
 	while(1)
 	{
-//		ICM_GetScaledData(&gyro, &accel);
-//		HAL_Delay(500);
+		ICM_GetScaledData(&gyro, &accel);
+		AK09916_RAW_GetData(&mag);
+		HAL_Delay(500);
 	}
 }
