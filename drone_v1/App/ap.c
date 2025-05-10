@@ -26,7 +26,7 @@ void apMain()
 	while(1)
 	{
 		ICM_GetScaledData(&gyro, &accel);
-		AK09916_RAW_GetData(&mag);
+//		AK09916_RAW_GetData(&mag);
 		HAL_Delay(500);
 	}
 }

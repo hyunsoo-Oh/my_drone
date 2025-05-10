@@ -34,9 +34,9 @@ void ICM_ClearOffsetRegisters()
 }
 
 // ICM-20948 바이어스 계산 및 오프셋 설정
-void ICM_Calibrate(GyroConfig *gyro, AccelConfig *accel)
+void ICM_CalculateOffset(GyroConfig *gyro, AccelConfig *accel)
 {
-	uint16_t samples = 200;
+	uint16_t samples = 1000;
     int32_t sum_gx = 0, sum_gy = 0, sum_gz = 0;
     int32_t sum_ax = 0, sum_ay = 0, sum_az = 0;
 
@@ -78,13 +78,6 @@ void ICM_Calibrate(GyroConfig *gyro, AccelConfig *accel)
     offset.x_accel = offset_ax;
     offset.y_accel = offset_ay;
     offset.z_accel = offset_az + accel->sensitivity;
-}
-
-// 오프셋 제거 메인 함수
-void ICM_REMOVE_Offset(GyroConfig *gyro_config, AccelConfig *accel_config)
-{
-    ICM_Calibrate(gyro_config, accel_config);   // Offset 설정
-    HAL_Delay(100);
 }
 
 // 하드웨어 방식으 OFFSET 제거 방법 (오류)

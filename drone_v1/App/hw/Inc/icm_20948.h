@@ -35,6 +35,7 @@
 #define INT_PIN_CFG				0x0F
 #define USER_CTRL				0x03
 
+#define SLV_SENS_DATA_00		0x3B
 #define SLV_SENS_DATA_01		0x3C
 #define SLV_SENS_DATA_02		0x3D
 #define SLV_SENS_DATA_03		0x3E
@@ -133,6 +134,13 @@ typedef struct {
 	gyroavg_t sample;		// 센서 데이터 읽는 속도 조절
 } GyroConfig;
 
+// 보정된 자이로스코프 데이터
+typedef struct {
+	float x_dps;         // X축 데이터
+	float y_dps;         // Y축 데이터
+	float z_dps;         // Z축 데이터
+} GyroData;
+
 // 가속도계 설정 구조체
 typedef struct {
 	uint8_t dlpf_en;        // DLPF Enable
@@ -146,10 +154,23 @@ typedef struct {
 	accelavg_t sample;		// 센서 데이터 읽는 속도 조절
 } AccelConfig;
 
+// 보정된 자이로스코프 데이터
+typedef struct {
+	float x_g;         // X축 데이터
+	float y_g;         // Y축 데이터
+	float z_g;         // Z축 데이터
+} AccelData;
+
 typedef struct {
 	int16_t x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
 	int16_t y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
 	int16_t z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
+} MagConfig;
+
+typedef struct {
+	float x_data;         // X축 데이터 (ACCEL_XOUT_H/L)
+	float y_data;         // Y축 데이터 (ACCEL_YOUT_H/L)
+	float z_data;         // Z축 데이터 (ACCEL_ZOUT_H/L)
 } MagData;
 
 typedef struct {
@@ -170,7 +191,8 @@ typedef struct {
 
 void ICM_Write(uint8_t bank, uint8_t reg, uint8_t data);
 void ICM_Read(uint8_t bank, uint8_t reg, uint8_t *data, uint8_t length);
-void ICM_SLV_Write(uint8_t slv, uint16_t addr, uint8_t reg, uint8_t data);
+void ICM_SLV_Write(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t data);
+void ICM_SLV_Read(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t *data);
 void ICM_SLV_Ctrl(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t length);
 
 void ICM_Init();
@@ -182,18 +204,18 @@ void ICM_SMPLRT_Divide(GyroConfig *gyro, AccelConfig *accel);
 
 void ICM_RAW_GetData(GyroConfig *gyro, AccelConfig *accel);
 void ICM_GetScaledData(GyroConfig *gyro, AccelConfig *accel);
+void ICM_Calibrate(GyroConfig gyro, AccelConfig accel, IcmOffset *offset);
+void ICM_REMOVE_Offset(GyroConfig *gyro_config, AccelConfig *accel_config, IcmOffset *offset);
 
 void ICM_SLV_Init();
 void ICM_SLV_WhoAmI(uint8_t slv, uint8_t addr, uint8_t reg, uint8_t id);
 void AK09916_MAG_Init();
-void AK09916_RAW_GetData(MagData *mag);
+void AK09916_RAW_GetData(MagConfig *mag);
 
 // Offset 관련 함수
 void ICM_SetGyroOffset(int16_t offset_x, int16_t offset_y, int16_t offset_z);
 void ICM_SetAccelOffset(int16_t offset_x, int16_t offset_y, int16_t offset_z);
 void ICM_ClearOffsetRegisters();
-void ICM_Calibrate(GyroConfig *gyro, AccelConfig *accel);
-void ICM_REMOVE_Offset(GyroConfig *gyro_config, AccelConfig *accel_config);
 
 // Self-Test 관련 함수
 float CALCULATE_FACTORY_Trim(uint8_t self_test_val);
