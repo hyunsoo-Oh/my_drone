@@ -15,7 +15,7 @@ GyroConfig gyro = {
 	.x_data = 0,
 	.y_data = 0,
 	.z_data = 0,
-	.fs_sel = _250dps,
+	.fs_sel = _2000dps,
 	.sample = _1xg
 };
 
@@ -27,7 +27,7 @@ AccelConfig accel = {
 	.x_data = 0,
 	.y_data = 0,
 	.z_data = 0,
-	.fs_sel = _2g,
+	.fs_sel = _16g,
 	.sample = _1_4xa
 };
 
@@ -210,33 +210,33 @@ void ICM_Calibrate(GyroConfig gyro, AccelConfig accel, IcmOffset *offset)
 {
 	switch (gyro.fs_sel)
 	{
-		case _2g:
+		case _250dps:
 			offset->x_gyro = -172;
 			offset->y_gyro = -33;
-			offset->z_gyro = -833;
+			offset->z_gyro = -1312;
 			break;
-		case _4g:
+		case _500dps:
 			offset->x_gyro = -85;
 			offset->y_gyro = -12;
-			offset->z_gyro = -832;
+			offset->z_gyro = -1120;
 			break;
-		case _8g:
+		case _1000dps:
 			offset->x_gyro = -44;
 			offset->y_gyro = -7;
-			offset->z_gyro = -848;
+			offset->z_gyro = -1188;
 			break;
-		case _16g:
+		case _2000dps:
 			offset->x_gyro = -21;
 			offset->y_gyro = -3;
-			offset->z_gyro = -848;
+			offset->z_gyro = -1024;
 			break;
 	}
 	switch (accel.fs_sel)
 	{
 		case _2g:
-			offset->x_accel = -288; 	// -8194;
-			offset->y_accel = -348;		// -4294;
-			offset->z_accel = -632;		// -3410;
+			offset->x_accel = -8242;
+			offset->y_accel = -4415;
+			offset->z_accel = -3411;
 			break;
 		case _4g:
 			offset->x_accel = -4088;
@@ -259,8 +259,8 @@ void ICM_Calibrate(GyroConfig gyro, AccelConfig accel, IcmOffset *offset)
 // 오프셋 제거 메인 함수
 void ICM_REMOVE_Offset(GyroConfig *gyro_config, AccelConfig *accel_config, IcmOffset *offset)
 {
-//	ICM_CalculateOffset(gyro_config, accel_config);
-    ICM_Calibrate(*gyro_config, *accel_config, offset);   // Offset 설정
+	ICM_CalculateOffset(gyro_config, accel_config);
+//    ICM_Calibrate(*gyro_config, *accel_config, offset);   // Offset 설정
     HAL_Delay(100);
 }
 
