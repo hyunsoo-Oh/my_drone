@@ -17,8 +17,6 @@ void apInit()
 	// 센서 초기화
 	ICM_Init(&gyro, &accel);
 
-	// Self-Test 수행
-	ICM_SELF_TEST_Init();
 }
 
 void apMain()

@@ -10,7 +10,7 @@
 
 #include "def.h"
 #include "usart.h"
-#include "Inc/icm_20948.h"
+#include "devices/imu/icm_20948.h"
 
 void hwInit(void);
 
