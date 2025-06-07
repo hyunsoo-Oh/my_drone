@@ -5,7 +5,7 @@
  *      Author: USER
  */
 
-#include <inc/i2c_util.h>
+#include <i2c_util.h>
 
 void I2C_Write(uint8_t addr, uint8_t reg, uint8_t data)
 {

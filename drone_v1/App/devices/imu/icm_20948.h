@@ -8,7 +8,7 @@
 #ifndef HW_INC_ICM_20948_H_
 #define HW_INC_ICM_20948_H_
 
-#include <inc/i2c_util.h>
+#include "i2c_util.h"
 #include "def.h"
 #include "usart.h"
 

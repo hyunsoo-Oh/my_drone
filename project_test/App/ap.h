@@ -12,6 +12,7 @@
 #include "usart.h"
 #include "GY521/gy-521.h"
 #include "MPU6500/mpu6500.h"
+#include "ESC/motor.h"
 
 void apInit(void);
 void apMain(void);

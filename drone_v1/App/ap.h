@@ -9,6 +9,10 @@
 #define AP_H_
 
 #include "hw.h"
+#include "delay.h"
+#include "devices/imu/mpu6500.h"
+#include "devices/motor/motor.h"
+#include "devices/motor/pid_control.h"
 
 void apInit(void);
 

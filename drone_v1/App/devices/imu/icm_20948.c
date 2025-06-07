@@ -7,7 +7,7 @@
 
 #include "icm_20948.h"
 
-GyroConfig gyro = {
+static GyroConfig gyro = {
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
 	.odr = 250,
@@ -19,7 +19,7 @@ GyroConfig gyro = {
 	.sample = _1xg
 };
 
-AccelConfig accel = {
+static AccelConfig accel = {
 	.dlpf_en = 1,
 	.dlpf_cfg = 0,
 	.odr = 250,
@@ -31,7 +31,7 @@ AccelConfig accel = {
 	.sample = _1_4xa
 };
 
-MagConfig mag = {
+static MagConfig mag = {
 	.x_data = 0,
 	.y_data = 0,
 	.z_data = 0
@@ -329,4 +329,10 @@ void AK09916_RAW_GetData(MagConfig *mag)
 	mag->z_data = (int16_t)(imu_data[5] << 8 | imu_data[4]);
 
 	printf("MAG X : %d, Y : %d, Z : %d \n", mag->x_data, mag->y_data, mag->z_data);
+}
+
+int _write(int file, unsigned char* p, int len)
+{
+    HAL_StatusTypeDef status = HAL_UART_Transmit(&huart2, p, len, 100);
+    return (status == HAL_OK ? len : 0);
 }
