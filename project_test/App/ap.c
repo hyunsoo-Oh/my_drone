@@ -24,7 +24,10 @@ void apInit(void)
 {
 //	GY521_Init();
 //	MPU6500_Init();
-	ESC_Init();
+//	ESC_Init();
+
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
 }
 
 void apMain(void)
@@ -32,32 +35,39 @@ void apMain(void)
     static uint8_t prev_state = 0;
     uint8_t is_pressed;
 
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 700);
+    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 700);
 	while (1)
 	{
-		is_pressed = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET); // 버튼 눌림: LOW
-		test = is_pressed;
 
-		if (is_pressed != prev_state)  // 상태 변화 감지
-		{
-			if (is_pressed)
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t*)"버튼 누름 → MIN\r\n", 22, 100);
 
-				// 버튼 누르고 있는 동안 → MIN 출력
-				for (int i = 0; i < MOTOR_COUNT; i++)
-					ESC_SetThrottle(&motors[i], 0);    // 0%   → 1000us → MIN
-			}
-			else
-			{
-				HAL_UART_Transmit(&huart2, (uint8_t*)"버튼 뗌 → MAX\r\n", 20, 100);
 
-				// 버튼에서 손을 떼면 → 다시 MAX 출력
-				for (int i = 0; i < MOTOR_COUNT; i++)
-					ESC_SetThrottle(&motors[i], 100);  // 100% → 2000us → MAX
-			}
 
-			prev_state = is_pressed;  // 상태 갱신은 딱 한 번
-		}
+
+//		is_pressed = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET); // 버튼 눌림: LOW
+//		test = is_pressed;
+//
+//		if (is_pressed != prev_state)  // 상태 변화 감지
+//		{
+//			if (is_pressed)
+//			{
+//				HAL_UART_Transmit(&huart2, (uint8_t*)"버튼 누름 → MIN\r\n", 22, 100);
+//
+//				// 버튼 누르고 있는 동안 → MIN 출력
+//				for (int i = 0; i < MOTOR_COUNT; i++)
+//					ESC_SetThrottle(&motors[i], 0);    // 0%   → 1000us → MIN
+//			}
+//			else
+//			{
+//				HAL_UART_Transmit(&huart2, (uint8_t*)"버튼 뗌 → MAX\r\n", 20, 100);
+//
+//				// 버튼에서 손을 떼면 → 다시 MAX 출력
+//				for (int i = 0; i < MOTOR_COUNT; i++)
+//					ESC_SetThrottle(&motors[i], 100);  // 100% → 2000us → MAX
+//			}
+//
+//			prev_state = is_pressed;  // 상태 갱신은 딱 한 번
+//		}
 	}
 }
 
