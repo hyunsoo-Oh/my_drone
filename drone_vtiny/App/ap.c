@@ -6,17 +6,22 @@
  */
 
 #include "ap.h"
+#include "nrf24l01.h"
+#include "drv8833.h"
+
+uint8_t payload[5] = "nRF24";
 
 void apInit(void)
 {
 	DRV8833_Init();
-	DRV8833_SetThrottle(400);
+	nRF24L01_TxInit();
 }
 
 void apMain(void)
 {
 	while (1)
 	{
-
+		nRF24L01_Send(payload, sizeof(payload));
+		HAL_Delay(500);
 	}
 }

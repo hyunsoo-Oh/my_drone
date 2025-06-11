@@ -9,12 +9,12 @@
 #include "spi.h"
 #include "gpio.h"
 
-#define NRF24_SPI			&hspi3
+#define NRF24_SPI			&hspi1
 
-#define NRF24_CE_HIGH()   	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET)
-#define NRF24_CE_LOW()    	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET)
-#define NRF24_CSN_HIGH()  	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET)
-#define NRF24_CSN_LOW()   	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET)
+#define NRF24_CE_HIGH()   	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET)
+#define NRF24_CE_LOW()    	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET)
+#define NRF24_CSN_HIGH()  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET)
+#define NRF24_CSN_LOW()   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET)
 
 uint8_t status;
 
@@ -124,7 +124,7 @@ void nRF24L01_RxInit(void)
 
 	// 채널 및 RF 설정
 	nRF24L01_WriteReg(NRF24_REG_RF_CH, 76);         // 채널 76 (TX와 동일해야 함)
-	nRF24L01_WriteReg(NRF24_REG_RF_SETUP, 0x06);    // 1Mbps, 0dBm
+	nRF24L01_WriteReg(NRF24_REG_RF_SETUP, 0x07);    // 1Mbps, 0dBm
 
 	// FIFO 초기화
 	nRF24L01_WriteReg(NRF24_CMD_FLUSH_RX, 0x00);    // RX FIFO 비우기
@@ -148,6 +148,8 @@ void nRF24L01_Send(uint8_t *payload, uint8_t len)
 
 bool nRF24L01_Read(uint8_t *payload, uint8_t len)
 {
+    uint8_t status;
+
     nRF24L01_ReadReg(NRF24_REG_STATUS, &status, 1);  // STATUS 레지스터 읽기
 
     // RX_DR (데이터 수신됨) 비트가 설정되었는지 확인
