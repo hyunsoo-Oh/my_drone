@@ -1,20 +1,20 @@
 /*
  * nrf24l01.c
  *
- *  Created on: Jun 11, 2025
- *      Author: User
+ *  Created on: Jun 9, 2025
+ *      Author: USER
  */
 
 #include "nrf24l01.h"
 #include "spi.h"
 #include "gpio.h"
 
-#define NRF24_SPI			&hspi3
+#define NRF24_SPI			&hspi1
 
-#define NRF24_CE_HIGH()   	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET)
-#define NRF24_CE_LOW()    	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_RESET)
-#define NRF24_CSN_HIGH()  	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_SET)
-#define NRF24_CSN_LOW()   	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_2, GPIO_PIN_RESET)
+#define NRF24_CE_HIGH()   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET)
+#define NRF24_CE_LOW()    	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET)
+#define NRF24_CSN_HIGH()  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET)
+#define NRF24_CSN_LOW()   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET)
 
 uint8_t status;
 

@@ -7,9 +7,7 @@
 
 #include "ap.h"
 #include "nrf24l01.h"
-#include "fakecode.h"
 
-uint8_t tx[4] = "fool";
 uint8_t payload[5];
 ////int16_t accel[3], gyro[3];
 //float accel[3], gyro[3];
@@ -32,14 +30,8 @@ void apInit(void)
 
 //	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 //	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_2);
-//	nRF24L01_RxInit();
+	nRF24L01_RxInit();
 //	nRF24L01_TxInit();
-	uint8_t addr[5] = {'R','x','A','A','A'};
-	nrf24_init();
-	nrf24_set_channel(76);
-	nrf24_set_tx_addr(addr, 5);
-	nrf24_set_payload_size(4);
-	nrf24_tx_mode();
 }
 
 void apMain(void)
@@ -51,22 +43,17 @@ void apMain(void)
 //    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_1, 700);
 	while (1)
 	{
-//		if (nRF24L01_Read(payload, sizeof(payload)))
-//		{
-//			int len = snprintf(msg, sizeof(msg),
-//						   "RX: %c%c%c%c%c\r\n",
-//						   payload[0], payload[1], payload[2], payload[3], payload[4]);
-//			HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
-//		}
-//		else
-//		{
-//			HAL_UART_Transmit(&huart2, (uint8_t*)"No data received\r\n", sizeof("No data received\r\n"), 100);
-//		}
+		if (nRF24L01_Read(payload, sizeof(payload)))
+		{
+			int len = snprintf(msg, sizeof(msg),
+						   "RX: %c%c%c%c%c\r\n",
+						   payload[0], payload[1], payload[2], payload[3], payload[4]);
+			HAL_UART_Transmit(&huart2, (uint8_t*)msg, len, 100);
+		}
+
+//		nRF24L01_Send(payload, sizeof(payload));
 
 
-	      nrf24_send_data(tx, 4);
-	      printf("NRF STATUS: 0x%02X\r\n", nrf24_read_reg(0x07));
-	      HAL_Delay(50);
 //		is_pressed = (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET); // 버튼 눌림: LOW
 //		test = is_pressed;
 //

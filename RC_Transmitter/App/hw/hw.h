@@ -11,6 +11,6 @@
 #include "def.h"
 
 void hwInit();
-
+void delay_us(uint32_t us);
 
 #endif /* HW_HW_H_ */

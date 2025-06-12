@@ -1,8 +1,8 @@
 /*
  * nrf24l01.h
  *
- *  Created on: Jun 11, 2025
- *      Author: User
+ *  Created on: Jun 9, 2025
+ *      Author: USER
  */
 
 #ifndef DEVICES_NRF24L01_NRF24L01_H_
