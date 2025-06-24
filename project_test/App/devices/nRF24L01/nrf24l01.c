@@ -61,32 +61,20 @@ static void nRF24L01_WritePayload(uint8_t *buf, uint8_t len)
     NRF24_CSN_HIGH();
 }
 
-void nRF24L01_TxInit(void)
+void nRF24L01_Init(void)
 {
-    NRF24_CE_LOW();		// 송신/수신 중단 (대기)
-    NRF24_CSN_HIGH();	// SPI 비활성화
-
-    HAL_Delay(5);		 // 모듈 안정화 대기
-
-    // 전원 ON, CRC ON, TX 모드(PRIM_RX=0)
-    nRF24L01_WriteReg(NRF24_REG_CONFIG, CONFIG_PWR_UP | CONFIG_EN_CRC);
-	HAL_Delay(100);
+	NRF24_CE_LOW();     // 설정 전 CE는 항상 LOW
+	NRF24_CSN_HIGH();
+	HAL_Delay(5);        // 안정화 시간
 
     // Pipe 설정 (Pipe 0 ~ 5 -> 최대 5개 수신기 가능)
 	nRF24L01_WriteReg(NRF24_REG_EN_AA, 0x01);		// Pipe 0 만 Auto ACK
 	nRF24L01_WriteReg(NRF24_REG_EN_RXADDR, 0x01);	// Pipe 0 활성화
 
-	//RF 설정
+	// RF 설정
 	nRF24L01_WriteReg(NRF24_REG_RF_SETUP, 0x07);	// 1Mbps, 0dBm
 	nRF24L01_WriteReg(NRF24_REG_SETUP_RETR, 0x3F);	// Auto ACK가 실패했을 때 15회 재전송, 750us 지연
 	nRF24L01_WriteReg(NRF24_REG_RF_CH, 76);			// Channel 76
-
-	// TX와 RX가 같은 주소를 설정해야 통신 가능 (Auto ACK를 사용하는 경우)
-	// 송신자는 수신 대상마다 TX_ADDR을 변경할 필요 있음
-	uint8_t tx_addr[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
-	nRF24L01_WriteBuf(NRF24_REG_TX_ADDR, tx_addr, 5);		// 송신 주소
-	nRF24L01_WriteBuf(NRF24_REG_RX_ADDR_P0, tx_addr, 5);  	// ACK 받을 주소
-	nRF24L01_WriteReg(NRF24_REG_SETUP_AW, 0x03);          	// 5바이트 주소 (길이)
 
     // FIFO 클리어
     nRF24L01_WriteReg(NRF24_CMD_FLUSH_TX, 0x00);
@@ -98,7 +86,28 @@ void nRF24L01_TxInit(void)
     NRF24_CE_LOW();
 }
 
-void nRF24L01_RxInit(void)
+void nRF24L01_TxMode(void)
+{
+    NRF24_CE_LOW();		// 송신/수신 중단 (대기)
+    NRF24_CSN_HIGH();	// SPI 비활성화
+
+    HAL_Delay(5);		 // 모듈 안정화 대기
+
+    // 전원 ON, CRC ON, TX 모드(PRIM_RX=0)
+    nRF24L01_WriteReg(NRF24_REG_CONFIG, CONFIG_PWR_UP | CONFIG_EN_CRC);
+	HAL_Delay(100);
+
+	// TX와 RX가 같은 주소를 설정해야 통신 가능 (Auto ACK를 사용하는 경우)
+	// 송신자는 수신 대상마다 TX_ADDR을 변경할 필요 있음
+	uint8_t tx_addr[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};
+	nRF24L01_WriteBuf(NRF24_REG_TX_ADDR, tx_addr, 5);		// 송신 주소
+	nRF24L01_WriteBuf(NRF24_REG_RX_ADDR_P0, tx_addr, 5);  	// ACK 받을 주소
+	nRF24L01_WriteReg(NRF24_REG_SETUP_AW, 0x03);          	// 5바이트 주소 (길이)
+
+    NRF24_CE_LOW();
+}
+
+void nRF24L01_RxMode(void)
 {
 	uint8_t rx_addr[5] = {0xE7, 0xE7, 0xE7, 0xE7, 0xE7};  // 송신기와 같은 주소
 
@@ -110,10 +119,6 @@ void nRF24L01_RxInit(void)
 	nRF24L01_WriteReg(NRF24_REG_CONFIG,
 					  CONFIG_PWR_UP | CONFIG_EN_CRC | CONFIG_PRIM_RX);
 	HAL_Delay(100);
-
-	// Pipe 0만 활성화 + Auto ACK 사용
-	nRF24L01_WriteReg(NRF24_REG_EN_AA, 0x01);       // Pipe 0만 Auto ACK
-	nRF24L01_WriteReg(NRF24_REG_EN_RXADDR, 0x01);   // Pipe 0만 수신 허용
 
 	// 주소 설정 (송신기의 TX_ADDR과 동일해야 수신 가능)
 	nRF24L01_WriteReg(NRF24_REG_SETUP_AW, 0x03);     // 주소 길이: 5바이트

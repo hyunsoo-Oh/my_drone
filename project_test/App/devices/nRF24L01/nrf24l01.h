@@ -80,8 +80,10 @@
 #define STATUS_RX_P_NO_MASK        	(0x0E)    // 수신된 데이터 파이프 번호 (3비트: [3:1])
 #define STATUS_TX_FULL             	(1 << 0)  // TX FIFO가 꽉 찼는지 여부
 
-void nRF24L01_TxInit(void);
-void nRF24L01_RxInit(void);
+void nRF24L01_Init(void);
+
+void nRF24L01_TxMode(void);
+void nRF24L01_RxMode(void);
 
 void nRF24L01_Send(uint8_t *payload, uint8_t len);
 bool nRF24L01_Read(uint8_t *payload, uint8_t len);
